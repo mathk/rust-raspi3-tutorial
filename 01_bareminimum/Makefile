@@ -23,6 +23,7 @@
 #
 
 TARGET = aarch64-unknown-none
+TARGET_PI2 = arm-none-eabihf
 
 SOURCES = $(wildcard **/*.rs) $(wildcard **/*.S) link.ld
 
@@ -37,8 +38,17 @@ QEMU_CMD = qemu-system-aarch64 -M raspi3 -kernel kernel8.img
 
 all: clean kernel8.img
 
+allpi2: clean kernel7.img
+
+target/$(TARGET_PI2)/release/kernel7: $(SOURCES)
+	cargo xbuild --target=$(TARGET_PI2).json --release
+
 target/$(TARGET)/release/kernel8: $(SOURCES)
 	cargo xbuild --target=$(TARGET) --release
+
+kernel7.img: target/$(TARGET_PI2)/release/kernel7
+	cp $< .
+	$(OBJCOPY) $(OBJCOPY_PARAMS) $< kernel8.img
 
 kernel8.img: target/$(TARGET)/release/kernel8
 	cp $< .
